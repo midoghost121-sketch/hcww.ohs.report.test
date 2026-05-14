@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>تقارير المرور على المحطات - الشركة القابضة لمياه الشرب والصرف الصحي</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="logos.js"></script>
+    <script src="app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="aboutModal" class="modal-overlay" style="display:none;" onclick="closeAbout(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="document.getElementById('aboutModal').style.display='none'"><i class="fas fa-times"></i></button>
+        <div class="about-header">
+            <div class="about-logos"><img src="logo-holding.png" class="about-logo"><img src="logo-safety.png" class="about-logo"></div>
+            <h2>تطبيق تقارير المرور على المحطات</h2>
+        </div>
+        <div class="about-body">
+            <div class="about-item"><span class="about-icon">🔢</span><div><strong>الإصدار:</strong> 1.0.0</div></div>
+            <div class="about-item"><span class="about-icon">📅</span><div><strong>تاريخ الإصدار:</strong> أبريل 2026</div></div>
+            <div class="about-divider"></div>
+            <div class="about-item"><span class="about-icon">🏢</span><div><strong>تم التصميم والتنفيذ بواسطة:</strong><br>الإدارة العامة للسلامة والصحة المهنية<br>بالشركة القابضة لمياه الشرب والصرف الصحي</div></div>
+            <div class="about-item"><span class="about-icon">👨‍💻</span><div><strong>المطور:</strong><br>م / أحمد الدسوقي<br>📧 ahmed.eldesoky@hcww.com.eg</div></div>
+            <div class="about-item"><span class="about-icon">🖥️</span><div><strong>تحت إشراف:</strong><br>الإدارة العامة لتكنولوجيا المعلومات<br>بالشركة القابضة لمياه الشرب والصرف الصحي</div></div>
+            <div class="about-divider"></div>
+            <div class="about-item"><span class="about-icon">🎯</span><div><strong>أهداف التطبيق:</strong><ul><li>توحيد نموذج تقارير المرور</li><li>تسهيل إدخال البيانات ميدانيًا</li><li>متابعة الملاحظات والإجراءات التصحيحية</li><li>دعم التحول الرقمي داخل الشركة</li></ul></div></div>
+            <div class="about-item"><span class="about-icon">👥</span><div><strong>الفئة المستهدفة:</strong><br>فرق التفتيش – مسؤولي السلامة والصحة المهنية – إدارات التشغيل</div></div>
+            <div class="about-divider"></div>
+            <div class="about-footer">© جميع الحقوق محفوظة للشركة القابضة لمياه الشرب والصرف الصحي © 2026</div>
+        </div>
+    </div>
+</div>
+
+<div id="saveConfirmModal" class="modal-overlay" style="display:none;" onclick="closeSaveConfirm(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="document.getElementById('saveConfirmModal').style.display='none'"><i class="fas fa-times"></i></button>
+        <div class="about-header">
+            <div class="about-logos"><img src="logo-holding.png" class="about-logo"><img src="logo-safety.png" class="about-logo"></div>
+            <h2>تم حفظ التقرير بنجاح</h2>
+        </div>
+        <div class="about-body" style="text-align:center">
+            <p style="font-size:15px;margin-bottom:20px;line-height:1.8;">تم حفظ التقرير في قسم التقارير السابقة بنجاح.</p>
+            <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="document.getElementById('saveConfirmModal').style.display='none';showScreen('reportsList');">عرض التقارير السابقة</button>
+            <button class="btn btn-secondary" style="width:100%;" onclick="document.getElementById('saveConfirmModal').style.display='none';">موافق</button>
+        </div>
+    </div>
+</div>
+
+<div id="mainScreen" class="screen active">
+    <div class="main-header">
+        <div class="main-header-top">
+            <div class="header-logo-box"><img src="logo-holding.png" alt="شعار" class="header-logo"></div>
+            <div class="header-titles">
+                <h1 class="header-title-main">الشركة القابضة لمياه الشرب والصرف الصحي</h1>
+                <h2 class="header-title-sub">الإدارة العامة للسلامة والصحة المهنية والطوارئ والأزمات</h2>
+                <div class="header-divider"></div>
+                <h3 class="header-title-report"><i class="fas fa-water"></i> تقرير المرور على محطات مياه الشرب والصرف الصحي</h3>
+            </div>
+            <div class="header-logo-box"><img src="logo-safety.png" alt="شعار" class="header-logo"></div>
+        </div>
+        <div class="header-date-bar"><div class="header-info-item"><i class="fas fa-calendar-alt"></i><span id="currentDate"></span></div></div>
+    </div>
+    <div class="stats-container">
+        <div class="stat-card total"><i class="fas fa-clipboard-list"></i><div class="stat-info"><span class="stat-number" id="totalReports">0</span><span class="stat-label">إجمالي التقارير</span></div></div>
+        <div class="stat-card compliant"><i class="fas fa-check-circle"></i><div class="stat-info"><span class="stat-number" id="compliantCount">0</span><span class="stat-label">مطابق</span></div></div>
+        <div class="stat-card non-compliant"><i class="fas fa-times-circle"></i><div class="stat-info"><span class="stat-number" id="nonCompliantCount">0</span><span class="stat-label">غير مطابق</span></div></div>
+    </div>
+    <div class="action-buttons">
+        <button class="btn btn-primary btn-large" onclick="showScreen('newReport')"><i class="fas fa-plus-circle"></i> تقرير جديد</button>
+        <button class="btn btn-secondary btn-large" onclick="showScreen('reportsList')"><i class="fas fa-folder-open"></i> التقارير السابقة</button>
+        <button class="btn btn-about" onclick="document.getElementById('aboutModal').style.display='flex'"><i class="fas fa-question-circle"></i> حول التطبيق</button>
+    </div>
+</div>
+
+<div id="newReport" class="screen">
+    <div class="screen-header">
+        <button class="btn-back" onclick="showScreen('mainScreen')"><i class="fas fa-arrow-right"></i></button>
+        <h2><i class="fas fa-file-medical"></i> تقرير مرور جديد</h2>
+    </div>
+    <div class="report-title-card">
+        <div class="report-title-logos">
+            <img src="logo-holding.png" alt="شعار" class="report-title-logo">
+            <div class="report-title-text">
+                <h2>الشركة القابضة لمياه الشرب والصرف الصحي</h2>
+                <p>الإدارة العامة للسلامة والصحة المهنية والطوارئ والأزمات</p>
+                <div class="report-title-sub-text"><i class="fas fa-water"></i> تقرير المرور على محطات مياه الشرب والصرف الصحي</div>
+            </div>
+            <img src="logo-safety.png" alt="شعار" class="report-title-logo">
+        </div>
+        <div class="report-title-details">
+            <div class="title-detail-item"><i class="fas fa-building"></i><span id="reportCompanyDisplay">--</span></div>
+            <div class="title-detail-item"><i class="fas fa-calendar-alt"></i><span id="reportDateDisplay">--</span></div>
+            <div class="title-detail-item"><i class="fas fa-industry"></i><span id="reportStationDisplay">--</span></div>
+        </div>
+    </div>
+
+    <form id="inspectionForm" class="form-container">
+        <div class="form-section">
+            <h3><i class="fas fa-info-circle"></i> المعلومات الأساسية</h3>
+
+            <div class="form-group form-group-full">
+                <label for="inspectorName"><i class="fas fa-user-tie"></i> اسم المفتش</label>
+                <input type="text" id="inspectorName" placeholder="أدخل اسم المفتش" required>
+            </div>
+
+            <div class="form-row-three">
+                <div class="form-group">
+                    <label for="companyName"><i class="fas fa-building"></i> الشركة</label>
+                    <select id="companyName" required onchange="updateCompanyDisplay()">
+                        <option value="">اختر الشركة</option>
+                        <option value="مياه القاهرة">مياه القاهرة</option>
+                        <option value="صرف القاهرة">صرف القاهرة</option>
+                        <option value="الجيزة">الجيزة</option>
+                        <option value="مياه الإسكندرية">مياه الإسكندرية</option>
+                        <option value="صرف الإسكندرية">صرف الإسكندرية</option>
+                        <option value="الدقهلية">الدقهلية</option>
+                        <option value="مرسى مطروح">مرسى مطروح</option>
+                        <option value="دمياط">دمياط</option>
+                        <option value="الفيوم">الفيوم</option>
+                        <option value="سوهاج">سوهاج</option>
+                        <option value="مدن القناة">مدن القناة</option>
+                        <option value="القليوبية">القليوبية</option>
+                        <option value="البحر الأحمر">البحر الأحمر</option>
+                        <option value="قنا">قنا</option>
+                        <option value="البحيرة">البحيرة</option>
+                        <option value="الأقصر">الأقصر</option>
+                        <option value="بني سويف">بني سويف</option>
+                        <option value="الشرقية">الشرقية</option>
+                        <option value="الغربية">الغربية</option>
+                        <option value="المنوفية">المنوفية</option>
+                        <option value="كفر الشيخ">كفر الشيخ</option>
+                        <option value="أسيوط">أسيوط</option>
+                        <option value="المنيا">المنيا</option>
+                        <option value="أسوان">أسوان</option>
+                        <option value="سيناء">سيناء</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inspectionDate"><i class="fas fa-calendar"></i> التاريخ</label>
+                    <input type="date" id="inspectionDate" required onchange="updateTitleDate()">
+                </div>
+                <div class="form-group">
+                    <label for="inspectionTime"><i class="fas fa-clock"></i> الوقت</label>
+                    <input type="time" id="inspectionTime" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group"><label for="stationType"><i class="fas fa-industry"></i> نوع المحطة</label>
+                    <select id="stationType" required onchange="updateTitleStation(); updateInspectionVisibility()"><option value="">اختر نوع المحطة</option><option value="محطة تنقية مياه">محطة تنقية مياه</option><option value="محطة معالجة صرف صحي">محطة معالجة صرف صحي</option><option value="محطة تحلية مياه البحر">محطة تحلية مياه البحر</option><option value="رافع صرف صحي">رافع صرف صحي</option><option value="رافع مياه شرب">رافع مياه شرب</option></select></div>
+                <div class="form-group"><label for="stationName"><i class="fas fa-map-pin"></i> اسم المحطة</label><input type="text" id="stationName" placeholder="أدخل اسم المحطة" required oninput="updateTitleStation()"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group"><label for="branch"><i class="fas fa-code-branch"></i> الفرع</label><input type="text" id="branch" placeholder="أدخل اسم الفرع" required oninput="updateTitleStation()"></div>
+                <div class="form-group"><label for="stationLocation"><i class="fas fa-map-marker-alt"></i> الموقع</label>
+                    <div class="input-with-btn"><input type="text" id="stationLocation" placeholder="الموقع أو GPS" required><button type="button" class="input-btn" onclick="getGPSLocation()"><i class="fas fa-crosshairs"></i> GPS</button></div></div>
+            </div>
+            <div id="gpsCoords" class="gps-display"></div>
+
+            <div class="form-row">
+                <div class="form-group"><label for="designCapacity"><i class="fas fa-drafting-compass"></i> الطاقة التصميمية</label>
+                    <div class="input-with-unit"><input type="number" id="designCapacity" placeholder="50000" step="any" min="0"><select class="input-unit-select" id="capacityUnit" onchange="changeCapacityUnit()"><option value="م³/يوم">م³/يوم</option><option value="لتر/ث">لتر/ث</option></select></div></div>
+                <div class="form-group"><label for="actualCapacity"><i class="fas fa-tachometer-alt"></i> الطاقة الفعلية</label>
+                    <div class="input-with-unit"><input type="number" id="actualCapacity" placeholder="35000" step="any" min="0"><span class="input-unit" id="actualUnit">م³/يوم</span></div></div>
+            </div>
+            <div class="capacity-bar-container" id="capacityBarContainer" style="display:none;"><label><i class="fas fa-chart-bar"></i> نسبة التشغيل</label><div class="capacity-bar"><div class="capacity-fill" id="capacityFill">0%</div></div><span class="capacity-text" id="capacityText"></span></div>
+            <div class="form-row">
+                <div class="form-group"><label for="safetyOfficer"><i class="fas fa-hard-hat"></i> مسؤول السلامة</label><input type="text" id="safetyOfficer" placeholder="اسم مسؤول السلامة" required></div>
+                <div class="form-group"><label for="stationManager"><i class="fas fa-user-shield"></i> مدير المحطة</label><input type="text" id="stationManager" placeholder="اسم مدير المحطة" required></div>
+            </div>
+            <div class="form-row-four">
+                <div class="form-group">
+                <div class="form-group-header">
+                    <label for="isoStatus"><i class="fas fa-certificate"></i> شهادة ايزو 1</label>
+                    <button type="button" class="btn-icon-small btn-icon-add" onclick="addIsoRow()" title="إضافة شهادة ايزو أخرى"><i class="fas fa-plus"></i></button>
+                </div>
+                <select id="isoStatus" onchange="toggleYearField('isoStatus','isoYear','isoYearMsg');toggleIsoType()">
+                    <option value="غير حاصلة">غير حاصلة</option>
+                    <option value="حاصلة">حاصلة</option>
+                </select>
+            </div>
+                <div class="form-group"><label for="isoType"><i class="fas fa-tag"></i> نوع الايزو</label><input type="text" id="isoType" placeholder="ISO 9001" style="display:none;"><div class="no-cert-msg" id="isoTypeMsg"><i class="fas fa-info-circle"></i> غير حاصلة</div></div>
+                <div class="form-group"><label for="isoYear"><i class="fas fa-calendar-check"></i> آخر تجديد</label><input type="number" id="isoYear" placeholder="2022" min="2000" max="2100" style="display:none;" oninput="updateIsoValidity('')"><div class="no-cert-msg" id="isoYearMsg"><i class="fas fa-info-circle"></i> غير حاصلة</div></div>
+                <div class="form-group"><label><i class="fas fa-clock"></i> الصلاحية</label><div id="isoValidity" class="validity-display no-cert">غير حاصلة</div></div>
+            </div>
+            <div id="additionalIsoContainer" style="margin-top:0;"></div>
+            <div class="form-row-three">
+                <div class="form-group"><label for="tsmStatus"><i class="fas fa-award"></i> شهادة TSM</label><select id="tsmStatus" onchange="toggleYearField('tsmStatus','tsmYear','tsmYearMsg');updateTsmValidity()"><option value="غير حاصلة">غير حاصلة</option><option value="حاصلة">حاصلة</option></select></div>
+                <div class="form-group"><label for="tsmYear"><i class="fas fa-calendar-check"></i> آخر تجديد</label><input type="number" id="tsmYear" placeholder="2023" min="2000" max="2100" style="display:none;" onchange="updateTsmValidity()" oninput="updateTsmValidity()"><div class="no-cert-msg" id="tsmYearMsg"><i class="fas fa-info-circle"></i> غير حاصلة</div></div>
+                <div class="form-group"><label><i class="fas fa-clock"></i> صلاحية الشهادة</label><div id="tsmValidity" class="validity-display no-cert">غير حاصلة</div></div>
+            </div>
+            <div class="form-row-three">
+                <div class="form-group"><label for="civilDefenseStatus"><i class="fas fa-fire-extinguisher"></i> تقرير الحماية المدنية</label><select id="civilDefenseStatus"><option value="غير حاصلة">غير حاصلة</option><option value="حاصلة">حاصلة</option></select></div>
+                <div class="form-group"><label for="wspStatus"><i class="fas fa-shield-alt"></i> شهادة سلامة ومأمونية المياه</label><select id="wspStatus" onchange="toggleYearField('wspStatus','wspYear','wspYearMsg')"><option value="غير حاصلة">غير حاصلة</option><option value="حاصلة">حاصلة</option></select></div>
+                <div class="form-group"><label for="wspYear"><i class="fas fa-calendar-check"></i> سنة الحصول</label><input type="number" id="wspYear" placeholder="2024" min="2000" max="2100" style="display:none;"><div class="no-cert-msg" id="wspYearMsg"><i class="fas fa-info-circle"></i> غير حاصلة</div></div>
+            </div>
+        </div>
+
+        <div class="form-section" id="inspectionSection" style="page-break-before:always;"><h3><i class="fas fa-clipboard-check"></i> بنود الفحص</h3><div id="inspectionInfo" class="inspection-info">يرجى اختيار نوع المحطة لظهور بنود الفحص</div><div id="inspectionItemsContainer"></div></div>
+
+        <div class="form-section"><h3><i class="fas fa-flag"></i> التقييم العام</h3>
+            <div id="overallContent" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label for="overallStatus"><i class="fas fa-flag"></i> الحالة العامة</label><select id="overallStatus" required onchange="updateOverallColor(this)"><option value="">اختر</option><option value="مطابق">✅ مطابق</option><option value="غير مطابق">❌ غير مطابق</option><option value="يحتاج متابعة">⚠️ يحتاج متابعة</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-exclamation-triangle"></i> درجة الخطورة</label><div class="severity-buttons"><button type="button" class="severity-btn low active" onclick="setSeverity('منخفضة',this)">منخفضة</button><button type="button" class="severity-btn medium" onclick="setSeverity('متوسطة',this)">متوسطة</button><button type="button" class="severity-btn high" onclick="setSeverity('عالية',this)">عالية</button><button type="button" class="severity-btn critical" onclick="setSeverity('حرجة',this)">حرجة</button></div><input type="hidden" id="severity" value="منخفضة"></div>
+                </div>
+            </div>
+            <p id="overallPlaceholder" style="margin-top:10px;color:#64748b;font-size:14px;text-align:center;">يرجى اختيار نوع المحطة لظهور بنود التقييم</p>
+        </div>
+
+        <div class="form-section"><h3><i class="fas fa-edit"></i> الملاحظات والتوصيات</h3>
+            <div id="notesContent" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label for="notes"><i class="fas fa-sticky-note"></i> الملاحظات</label><textarea id="notes" rows="4" placeholder="الملاحظات..."></textarea></div>
+                    <div class="form-group"><label for="recommendations"><i class="fas fa-lightbulb"></i> التوصيات</label><textarea id="recommendations" rows="4" placeholder="التوصيات..."></textarea></div>
+                </div>
+            </div>
+            <p id="notesPlaceholder" style="margin-top:10px;color:#64748b;font-size:14px;text-align:center;">يرجى اختيار نوع المحطة لظهور الملاحظات والتوصيات</p>
+        </div>
+
+        <div class="form-section"><h3><i class="fas fa-camera"></i> صور عامة للمحطة</h3>
+            <div id="photosContent" style="display:none;">
+                <div class="upload-box"><i class="fas fa-cloud-upload-alt"></i><p>صور عامة للمحطة</p><span>حد أقصى 12 صورة</span>
+                    <div style="display:flex;gap:10px;margin-top:15px;justify-content:center;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-primary btn-small" onclick="document.getElementById('photoInput').click()"><i class="fas fa-images"></i> معرض</button>
+                        <button type="button" class="btn btn-success btn-small" onclick="document.getElementById('cameraInput').click()"><i class="fas fa-camera"></i> كاميرا</button></div></div>
+                <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotos(this)">
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotos(this)">
+                <div id="photoPreview" class="photo-preview-grid"></div>
+            </div>
+            <p id="photosPlaceholder" style="margin-top:10px;color:#64748b;font-size:14px;text-align:center;">يرجى اختيار نوع المحطة لرفع صور المحطة</p>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-success btn-large" onclick="saveReport(true)"><i class="fas fa-save"></i> حفظ</button>
+            <button type="button" class="btn btn-primary btn-large" onclick="saveAndExportPDF()"><i class="fas fa-file-pdf"></i> حفظ وتصدير PDF</button>
+        </div>
+    </form>
+</div>
+
+<div id="reportsList" class="screen">
+    <div class="screen-header"><button class="btn-back" onclick="showScreen('mainScreen')"><i class="fas fa-arrow-right"></i></button><h2><i class="fas fa-folder-open"></i> التقارير السابقة</h2></div>
+    <div class="filter-bar">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="بحث..." oninput="filterReports()"></div>
+        <select id="filterStatus" onchange="filterReports()"><option value="all">كل الحالات</option><option value="مطابق">مطابق</option><option value="غير مطابق">غير مطابق</option><option value="يحتاج متابعة">يحتاج متابعة</option></select>
+        <select id="filterCompany" onchange="filterReports()"><option value="all">كل الشركات</option></select>
+    </div>
+    <div id="reportsContainer" class="reports-list"></div>
+</div>
+
+<div id="viewReport" class="screen">
+    <div class="screen-header"><button class="btn-back" onclick="showScreen('reportsList')"><i class="fas fa-arrow-right"></i></button><h2><i class="fas fa-file-alt"></i> تفاصيل التقرير</h2>
+        <button class="btn btn-primary btn-small" onclick="exportCurrentPDF()"><i class="fas fa-file-pdf"></i> PDF</button></div>
+    <div id="reportDetail" class="report-detail"></div>
+</div>
+
+<div id="pdfTemplate" style="display:none;"></div>
+<div id="successToast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMessage">تم الحفظ</span></div>
+<script src="app.js"></script>
+</body>
+</html>
