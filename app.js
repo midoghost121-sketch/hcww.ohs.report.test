@@ -32,7 +32,7 @@ var inspectionItemsByType = {
         { id: 'safeProcedures', label: 'إجراءات العمل الآمنة واللوحات الإرشادية والتحذيرية', showPhotos: true, options: ['مطابق', 'مطابق مع ملاحظات', 'غير مطابق'], notesHideValues: ['مطابق'] },
         { id: 'recordsAndEmergencyPlans', label: 'السجلات وخطط الطوارئ', showPhotos: false, options: ['مكتمل ومحدث', 'جزئي / يحتاج استكمال', 'غير متوفر'], notesHideValues: ['مكتمل ومحدث'] },
         { id: 'staffTraining', label: 'تدريب العاملين على السلامة والصحة المهنية', showPhotos: false, options: ['تم وفق الخطة', 'تم جزئياً', 'لم يتم'], notesHideValues: ['تم وفق الخطة'] },
-        { id: 'craneCerts', label: 'شهادات معايرة وفحص الأوناش والمعدات الرافعة', showPhotos: false, options: ['سارية ومحدثة', 'منتهية / تحتاج تحديث', 'غير متوفرة'], notesHideValues: ['سارية ومحدثة'] }
+        { id: 'craneCerts', label: 'شهادات المعايرة والفحص', showPhotos: false, options: ['سارية ومحدثة', 'منتهية / تحتاج تحديث', 'غير متوفرة'], notesHideValues: ['سارية ومحدثة'] }
     ],
     'محطة معالجة صرف صحي': [
         { id: 'inletAndScreens', label: 'المدخل والمصافي', showPhotos: true, options: ['مطابق', 'مطابق مع ملاحظات', 'غير مطابق'], notesHideValues: ['مطابق'] },
@@ -206,7 +206,10 @@ function showScreen(id) {
     document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     if (id === 'reportsList') renderReportsList();
+    if (id === 'plansList' && typeof renderPlansList === 'function') renderPlansList();
     if (id === 'newReport') resetForm();
+    var tpl = document.getElementById('pdfTemplate');
+    if (tpl) tpl.style.display = 'none';
     window.scrollTo(0, 0);
 }
 
@@ -569,6 +572,8 @@ function saveAndExportPDF() { var r = saveReport(false); if (r) { showToast('⏳
 
 function generatePDF(report) {
     var sc = report.overallStatus === 'مطابق' ? 'pdf-compliant' : report.overallStatus === 'غير مطابق' ? 'pdf-non-compliant' : 'pdf-follow-up';
+    var severityClass = report.severity === 'منخفضة' ? 'pdf-severity-low' : report.severity === 'متوسطة' ? 'pdf-severity-medium' : report.severity === 'عالية' ? 'pdf-severity-high' : report.severity === 'حرجة' ? 'pdf-severity-critical' : 'pdf-severity-default';
+    var severityLabel = '<span class="pdf-severity-badge ' + severityClass + '">' + report.severity + '</span>';
     var unit = report.capacityUnit || 'م³/يوم';
     var capHTML = '';
     if (report.designCapacity && report.actualCapacity) {
@@ -652,9 +657,9 @@ function generatePDF(report) {
         '<tr><td>شهادة سلامة ومأمونية المياه</td><td>' + wspH + '</td></tr>' +
         '</table></div>' +
         '<div class="html2pdf__page-break"></div>' +
-        '<div class="pdf-section" style="height:272mm; border:1px solid #e0e0e0; border-radius:8px; padding:0; margin:0; overflow:hidden;"><table class="pdf-items-table" style="height:100%; width:100%; border-style:hidden;"><thead><tr><th colspan="5" style="background:none;border:none;padding:10px;text-align:right;"><h3 style="margin:0;color:#1e293b;">🔍 بنود الفحص</h3></th></tr><tr><th style="width:4%;">#</th><th style="width:28%;">البند</th><th style="width:14%;">النتيجة</th><th style="width:38%;">التفاصيل</th><th style="width:16%;">صورة</th></tr></thead><tbody>' + itemsHTML + '</tbody></table></div>' +
+        '<div class="pdf-section pdf-items-section" style="border:1px solid #e0e0e0; border-radius:8px; padding:0; margin:0;"><table class="pdf-items-table" style="width:100%; border-style:hidden;"><thead><tr><th colspan="5" style="background:none;border:none;padding:10px;text-align:right;"><h3 style="margin:0;color:#1e293b;">🔍 بنود الفحص</h3></th></tr><tr><th style="width:4%;">#</th><th style="width:28%;">البند</th><th style="width:14%;">النتيجة</th><th style="width:38%;">التفاصيل</th><th style="width:16%;">صورة</th></tr></thead><tbody>' + itemsHTML + '</tbody></table></div>' +
         '<div class="html2pdf__page-break"></div>' +
-        '<div class="pdf-section" style="margin-top:20px;"><h3>📊 التقييم العام</h3><table class="pdf-table"><tr><td>الحالة</td><td><span class="pdf-status-badge ' + sc + '">' + report.overallStatus + '</span></td></tr><tr><td>الخطورة</td><td>' + report.severity + '</td></tr></table></div>' +
+        '<div class="pdf-section" style="margin-top:20px;"><h3>📊 التقييم العام</h3><table class="pdf-table"><tr><td>الحالة</td><td><span class="pdf-status-badge ' + sc + '">' + report.overallStatus + '</span></td></tr><tr><td>الخطورة</td><td>' + severityLabel + '</td></tr></table></div>' +
         (report.notes ? '<div class="pdf-section"><h3>📝 الملاحظات</h3><p style="font-size:13px;line-height:1.8;">' + report.notes + '</p></div>' : '') +
         (report.recommendations ? '<div class="pdf-section"><h3>💡 التوصيات</h3><p style="font-size:13px;line-height:1.8;">' + report.recommendations + '</p></div>' : '') +
         phHTML + '<div class="pdf-footer"><p>الشركة القابضة لمياه الشرب والصرف الصحي</p><p>' + report.companyName + ' - ' + report.stationName + ' - ' + report.branch + '</p><p>' + new Date().toLocaleDateString('ar-EG') + ' - ' + new Date().toLocaleTimeString('ar-EG') + '</p></div></div>';
